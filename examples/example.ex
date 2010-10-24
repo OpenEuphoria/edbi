@@ -5,14 +5,13 @@
 include std/datetime.e
 include edbi/edbi.e
 
-
 sequence data = {
     { "Ronald Mc'Donald", 29382, datetime:subtract(datetime:new(), 32, YEARS) },
     { "Super Man", 55555, datetime:new(1944, 5, 18) },
     { "Wonder Woman", 21232, datetime:new(1972, 9, 29) }
 }
 
-edbi:set_driver_path("drivers")
+edbi:set_driver_path("../drivers")
 edbi:db_handle dbh = edbi:open("sqlite3://example.db")
 --edbi:db_handle dbh = edbi:open("mysql://user:secret@localhost/test")
 
