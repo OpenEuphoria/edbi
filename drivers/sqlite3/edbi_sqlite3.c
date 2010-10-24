@@ -25,6 +25,31 @@
 #include "euinit.h"
 #include "edbi.h"
 
+#ifndef __MINGW32__
+int strnicmp(const char *s1, const char *s2, size_t len)
+{ 
+    /* Yes, Virginia, it had better be unsigned */
+    unsigned char c1, c2;
+
+    if (!len)
+        return 0;
+
+    do {
+        c1 = *s1++;
+        c2 = *s2++;
+        if (!c1 || !c2)
+            break;
+        if (c1 == c2)
+            continue;
+        c1 = tolower(c1);
+        c2 = tolower(c2);
+        if (c1 != c2)
+            break;
+    } while (--len);
+    return (int)c1 - (int)c2;
+}
+#endif
+
 /*
 Functions to expose:
 
@@ -41,7 +66,7 @@ Functions to expose:
   X total_changes
 */
 
-object __cdecl edbi_open(object conn_str)
+object EXPORT edbi_open(object conn_str)
 {
 	char *c_conn_str;
     sqlite3 *db;
@@ -59,21 +84,21 @@ object __cdecl edbi_open(object conn_str)
     return db;
 }
 
-void __cdecl edbi_close(object dbh)
+void EXPORT edbi_close(object dbh)
 {
     sqlite3 *db = (sqlite3 *) dbh;
     if (db != 0)
         sqlite3_close(db);
 }
 
-object __cdecl edbi_error_code(object dbh)
+object EXPORT edbi_error_code(object dbh)
 {
     sqlite3 *db = (sqlite3 *) dbh;
 
     return sqlite3_errcode(db);
 }
 
-object __cdecl edbi_error_message(object dbh)
+object EXPORT edbi_error_message(object dbh)
 {
     sqlite3 *db = (sqlite3 *) dbh;
     char *msg = sqlite3_errmsg(db);
@@ -81,7 +106,7 @@ object __cdecl edbi_error_message(object dbh)
     return NewString(msg);
 }
 
-object __cdecl edbi_execute(object dbh, object sql)
+object EXPORT edbi_execute(object dbh, object sql)
 {
     sqlite3 *db = (sqlite3 *) dbh;
 	char *c_sql;
@@ -97,21 +122,21 @@ object __cdecl edbi_execute(object dbh, object sql)
     return result;
 }
 
-object __cdecl edbi_last_insert_id(object dbh, object seq_name)
+object EXPORT edbi_last_insert_id(object dbh, object seq_name)
 {
     sqlite3 *db = (sqlite3 *) dbh;
 
     return sqlite3_last_insert_rowid(db);
 }
 
-object __cdecl edbi_total_changes(object dbh)
+object EXPORT edbi_total_changes(object dbh)
 {
     sqlite3 *db = (sqlite3 *) dbh;
 
     return sqlite3_total_changes(db);
 }
 
-object __cdecl edbi_query(object dbh, object sql)
+object EXPORT edbi_query(object dbh, object sql)
 {
     sqlite3 *db = (sqlite3 *) dbh;
     sqlite3_stmt *stmt = 0;
@@ -162,7 +187,7 @@ object __cdecl edbi_query(object dbh, object sql)
     return MAKE_SEQ(result);
 }
 
-object __cdecl edbi_next(object dbr, object row)
+object EXPORT edbi_next(object dbr, object row)
 {
     sqlite3_stmt *stmt = (sqlite3 *) dbr;
     int result = sqlite3_step(stmt);
@@ -181,7 +206,7 @@ object __cdecl edbi_next(object dbr, object row)
     return result;
 }
 
-void __cdecl edbi_closeq(object dbr)
+void EXPORT edbi_closeq(object dbr)
 {
     sqlite3_stmt *stmt = (sqlite3 *) dbr;
     sqlite3_finalize(stmt);
