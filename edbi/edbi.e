@@ -472,9 +472,9 @@ public function query(sequence sql, sequence data={}, db_handle h = 0)
 
     object tmp
     if m_seq[T_DLL_H] = NOT_A_DLL then
-    tmp = call_func(m_seq[T_DQUERY], { m_seq[T_DB_H], sprintf_sql(sql, data) })
+        tmp = call_func(m_seq[T_DQUERY], { m_seq[T_DB_H], sprintf_sql(sql, data) })
     else
-    tmp = c_func(m_seq[T_DQUERY], { m_seq[T_DB_H], sprintf_sql(sql, data) })
+        tmp = c_func(m_seq[T_DQUERY], { m_seq[T_DB_H], sprintf_sql(sql, data) })
     end if
 	if error_code() then
 		return error_code()
@@ -503,9 +503,9 @@ public function next(dbr_handle dbr)
 
 	object result
     if m_seq[T_DLL_H] = NOT_A_DLL then
-	result = call_func(m_seq[T_DNEXT], { m_q_seq[Q_DBR], m_q_seq[Q_ROW] })
+        result = call_func(m_seq[T_DNEXT], { m_q_seq[Q_DBR], m_q_seq[Q_ROW] })
     else
-	result = c_func(m_seq[T_DNEXT], { m_q_seq[Q_DBR], m_q_seq[Q_ROW] })
+        result = c_func(m_seq[T_DNEXT], { m_q_seq[Q_DBR], m_q_seq[Q_ROW] })
     end if
     if atom(result) then
         return result
