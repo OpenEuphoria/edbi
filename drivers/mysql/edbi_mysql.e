@@ -1,5 +1,5 @@
 --
--- Copyright (C) 2009 by Jeremy Cowgar <jeremy@cowgar.com>
+-- Copyright (C) 2009,2010 by Jeremy Cowgar <jeremy@cowgar.com>
 --
 -- This file is part of edbi.
 --
@@ -67,7 +67,7 @@ constant lib_mysql = open_dll({
 	"libmysql.dll"
 })
 
-if lib_mysql = -1 then
+if lib_mysql = 0 then
 	crash("Could not find a suitable MySQL shared library")
 end if
 
