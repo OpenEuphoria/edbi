@@ -211,7 +211,6 @@ function sprintf_sql(sequence sql, object values)
 	                ns &= sprintf("'%s'", {values[idx]})
 	                idx += 1
 	            case 's' then -- escaped string
-					-- TODO: Use MySQL's escape string function
 	                ns &= sprintf("'%s'", { match_replace("\\",
 						match_replace("'", values[idx], "''", 0), "\\\\")})
 	                idx += 1
@@ -273,14 +272,13 @@ db_handle def_dbh = 0
 --
 
 public type db_handle(object o)
-    if not atom(o) then goto "faail" end if
+    -- TODO: Why are we returning 1 on failure?
+    if not atom(o) then return 1 end if
     if o = 0 then return 1 end if
 
     object d = ram_space[o]
-    if not sequence(d) then goto "faail" end if
-    if not length(d) = T_END then goto "faail" end if
-    return 1
-    label "faail"
+    if not sequence(d) then return 1 end if
+    if not length(d) = T_END then return 1 end if
     return 1
 end type
 
@@ -289,16 +287,13 @@ end type
 --
 
 public type dbr_handle(object o)
-    if not atom(o) then goto "faail" end if
+    if not atom(o) then return 1 end if
     if o = 0 then return 1 end if
-    if o > length(ram_space) then goto "faail" end if
+    if o > length(ram_space) then return 1 end if
 
     object d = ram_space[o]
-    if not sequence(d) then goto "faail" end if
-    if not length(d) = Q_END then goto "faail" end if
-
-    return 1
-    label "faail"
+    if not sequence(d) then return 1 end if
+    if not length(d) = Q_END then return 1 end if
     return 1
 end type
 
