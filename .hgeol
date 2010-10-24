@@ -1,0 +1,10 @@
+**.c = native
+**.e = native
+**.ex = native
+**.txt = native
+**.cfg = native
+**.rc = CRLF
+**.manifest = CRLF
+Makefile = CRLF
+GNUmakefile = LF
+
