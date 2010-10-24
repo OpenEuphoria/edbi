@@ -22,9 +22,10 @@
 #ifndef EDBI_H
 #define EDBI_H
 
-#define EU_ATOM     1
-#define EU_INTEGER  2
-#define EU_SEQUENCE 3
-#define EU_DATETIME 4
+#define EU_NATIVE   1
+#define EU_ATOM     2
+#define EU_INTEGER  3
+#define EU_SEQUENCE 4
+#define EU_DATETIME 5
 
 #endif
