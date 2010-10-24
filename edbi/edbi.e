@@ -211,8 +211,11 @@ function sprintf_sql(sequence sql, object values)
 	                ns &= sprintf("'%s'", {values[idx]})
 	                idx += 1
 	            case 's' then -- escaped string
-	                ns &= sprintf("'%s'", { match_replace("\\",
-						match_replace("'", values[idx], "''", 0), "\\\\")})
+	                ns &= sprintf("'%s'", { 
+                            match_replace("\\",
+						        match_replace("'", values[idx], "''", 0), 
+                            "\\\\")
+                        })
 	                idx += 1
 	            case 'd' then  -- integer
 	                ns &= sprintf("%d", {values[idx]})
@@ -322,33 +325,37 @@ public function open(sequence connection, object routines = 0 )
 	m_seq[T_DRIVER] = driver
     m_seq[T_CONNSTR] = conn_str
     if atom(routines) then
-    m_seq[T_DLL_H] = open_dll({ dll_name1, dll_name2, dll_name3 })
-    m_seq[T_DOPEN] = define_c_func(m_seq[T_DLL_H], "edbi_open", { E_SEQUENCE }, E_ATOM)
-    m_seq[T_DCLOSE] = define_c_proc(m_seq[T_DLL_H], "edbi_close", { E_ATOM })
-    m_seq[T_DERROR_CODE] = define_c_func(m_seq[T_DLL_H], "edbi_error_code", { E_ATOM }, E_INTEGER)
-    m_seq[T_DERROR_MESSAGE] = define_c_func(m_seq[T_DLL_H], "edbi_error_message", { E_ATOM }, E_SEQUENCE)
-    m_seq[T_DEXECUTE] = define_c_func(m_seq[T_DLL_H], "edbi_execute", { E_ATOM, E_SEQUENCE }, E_INTEGER)
-    m_seq[T_DLAST_INSERT_ID] = define_c_func(m_seq[T_DLL_H], "edbi_last_insert_id", { E_ATOM, E_SEQUENCE }, E_ATOM)
-    m_seq[T_DTOTAL_CHANGES] = define_c_func(m_seq[T_DLL_H], "edbi_total_changes", { E_ATOM }, E_ATOM)
-    m_seq[T_DQUERY] = define_c_func(m_seq[T_DLL_H], "edbi_query", { E_ATOM, E_SEQUENCE }, E_SEQUENCE)
-    m_seq[T_DNEXT] = define_c_func(m_seq[T_DLL_H], "edbi_next", { E_ATOM, E_INTEGER }, E_OBJECT)
-    m_seq[T_DCLOSEQ] = define_c_proc(m_seq[T_DLL_H], "edbi_closeq", { E_ATOM })
+        atom hDll = open_dll({ dll_name1, dll_name2, dll_name3 })
+        if hDll = 0 then
+            crash("Could not open driver as:\n  %s\n  %s\n  %s", { dll_name1, dll_name2, dll_name3 })
+        end if
+        m_seq[T_DLL_H] = hDll
+        m_seq[T_DOPEN] = define_c_func(hDll, "edbi_open", { E_SEQUENCE }, E_ATOM)
+        m_seq[T_DCLOSE] = define_c_proc(hDll, "edbi_close", { E_ATOM })
+        m_seq[T_DERROR_CODE] = define_c_func(hDll, "edbi_error_code", { E_ATOM }, E_INTEGER)
+        m_seq[T_DERROR_MESSAGE] = define_c_func(hDll, "edbi_error_message", { E_ATOM }, E_SEQUENCE)
+        m_seq[T_DEXECUTE] = define_c_func(hDll, "edbi_execute", { E_ATOM, E_SEQUENCE }, E_INTEGER)
+        m_seq[T_DLAST_INSERT_ID] = define_c_func(hDll, "edbi_last_insert_id", { E_ATOM, E_SEQUENCE }, E_ATOM)
+        m_seq[T_DTOTAL_CHANGES] = define_c_func(hDll, "edbi_total_changes", { E_ATOM }, E_ATOM)
+        m_seq[T_DQUERY] = define_c_func(hDll, "edbi_query", { E_ATOM, E_SEQUENCE }, E_SEQUENCE)
+        m_seq[T_DNEXT] = define_c_func(hDll, "edbi_next", { E_ATOM, E_INTEGER }, E_OBJECT)
+        m_seq[T_DCLOSEQ] = define_c_proc(hDll, "edbi_closeq", { E_ATOM })
 
-	m_seq[T_DB_H] = c_func(m_seq[T_DOPEN], { conn_str })
+        m_seq[T_DB_H] = c_func(m_seq[T_DOPEN], { conn_str })
     else
-    m_seq[T_DLL_H] = NOT_A_DLL
-    m_seq[T_DOPEN] = routines[1]
-    m_seq[T_DCLOSE] = routines[2]
-    m_seq[T_DERROR_CODE] = routines[3]
-    m_seq[T_DERROR_MESSAGE] = routines[4]
-    m_seq[T_DEXECUTE] = routines[5]
-    m_seq[T_DLAST_INSERT_ID] = routines[6]
-    m_seq[T_DTOTAL_CHANGES] = routines[7]
-    m_seq[T_DQUERY] = routines[8]
-    m_seq[T_DNEXT] = routines[9]
-    m_seq[T_DCLOSEQ] = routines[10]
+        m_seq[T_DLL_H] = NOT_A_DLL
+        m_seq[T_DOPEN] = routines[1]
+        m_seq[T_DCLOSE] = routines[2]
+        m_seq[T_DERROR_CODE] = routines[3]
+        m_seq[T_DERROR_MESSAGE] = routines[4]
+        m_seq[T_DEXECUTE] = routines[5]
+        m_seq[T_DLAST_INSERT_ID] = routines[6]
+        m_seq[T_DTOTAL_CHANGES] = routines[7]
+        m_seq[T_DQUERY] = routines[8]
+        m_seq[T_DNEXT] = routines[9]
+        m_seq[T_DCLOSEQ] = routines[10]
 
-	m_seq[T_DB_H] = call_func(m_seq[T_DOPEN], { conn_str })
+        m_seq[T_DB_H] = call_func(m_seq[T_DOPEN], { conn_str })
     end if
 
 	ram_space[m_h] = m_seq
