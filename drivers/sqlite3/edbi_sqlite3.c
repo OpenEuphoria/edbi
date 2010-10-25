@@ -33,6 +33,10 @@ int strnicmp(const char *s1, const char *s2, size_t len)
 
     if (!len)
         return 0;
+    if (s1 == NULL)
+        return -1;
+    if (s2 == NULL)
+        return 1;
 
     do {
         c1 = *s1++;
@@ -161,7 +165,11 @@ object EXPORT edbi_query(object dbh, object sql)
 
         col->base[1] = NewString(sqlite3_column_name(stmt, i));
 
-        if (strnicmp(typ, "numeric", 7) == 0 ||
+        if (typ == NULL)
+        {
+            col->base[2] = EU_NATIVE;
+        }
+        else if (strnicmp(typ, "numeric", 7) == 0 ||
             strnicmp(typ, "decimal", 7) == 0)
         {
             col->base[2] = EU_ATOM;

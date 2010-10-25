@@ -134,6 +134,7 @@ include std/filesys.e
 include std/get.e
 include std/search.e
 include std/sequence.e
+include std/convert.e
 
 include defs.e
 
@@ -522,6 +523,12 @@ public function next(dbr_handle dbr)
 
             case EU_DATETIME then
                 result[i] = sqlDateTimeToDateTime(result[i])
+
+            case EU_NATIVE then
+                object tNum = to_number(result[i], -1)
+                if not sequence(tNum) then
+                    result[i] = tNum
+                end if
         end switch
     end for
     return result
