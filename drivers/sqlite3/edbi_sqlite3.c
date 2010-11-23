@@ -205,7 +205,12 @@ object EXPORT edbi_next(object dbr, object row)
         s1_ptr s = NewS1(cols);
 
         for (i=0; i < cols; i++) {
-            s->base[i + 1] = NewString(sqlite3_column_text(dbr, i));
+			char *colTxt = sqlite3_column_text(dbr, i);
+			if (colTxt == NULL) {
+				s->base[i + 1] = NewString("");
+			} else {
+	            s->base[i + 1] = NewString(sqlite3_column_text(dbr, i));
+			}
         }
 
         return MAKE_SEQ(s);
