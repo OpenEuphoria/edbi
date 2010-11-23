@@ -234,6 +234,9 @@ function sprintf_sql(sequence sql, object values)
 	            case 'f' then -- float
 	                ns &= sprintf("%f", {values[idx]})
 	                idx += 1
+	            case 'v' then -- verbatim
+	            	ns &= values[idx]
+	            	idx += 1
 				case else
 					crash("Unknown format character: %s (parameter #%d) in SQL %s",
 						{ ch, idx, sql })
