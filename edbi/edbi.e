@@ -513,6 +513,7 @@ public function next(dbr_handle dbr)
     else
         result = c_func(m_seq[T_DNEXT], { m_q_seq[Q_DBR], m_q_seq[Q_ROW] })
     end if
+
     if atom(result) then
         return result
     end if
@@ -534,6 +535,9 @@ public function next(dbr_handle dbr)
                 end if
         end switch
     end for
+
+	ram_space[dbr] = m_q_seq
+
     return result
 end function
 
