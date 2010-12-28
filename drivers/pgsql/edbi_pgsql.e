@@ -366,5 +366,37 @@ public function edbi_next(atom dbr, atom row)
 end function
 
 public function edbi_last_insert_id(atom dbh, sequence seq_name)
-	return -1
+	sequence sql, extra
+	atom res, pSql
+
+	seq_name = find_replace("'", seq_name, "''")
+	sql = sprintf("SELECT CURRVAL('%s')", { seq_name })
+
+	extra = get_connection(dbh)
+	extra[DBH_AFFECTED_ROWS] = 0
+	extra[DBH_ERROR_CODE] = 0
+	extra[DBH_ERROR_MESSAGE] = ""
+
+	pSql = allocate_string(sql)
+	res = c_func(hPQexec, { dbh, pSql })
+	free(pSql)
+
+	atom status = c_func(hPQresultStatus, { res })
+
+	if status = PGRES_TUPLES_OK then
+		atom pVal = c_func(hPQgetvalue, { res, 0, 0 })
+		sequence val = peek_string(pVal)
+		val = value(val)
+		if val[1] = GET_SUCCESS then
+			status = val[2]
+		else
+			status = -1
+		end if
+	else
+		status = -1
+	end if
+
+	c_proc(hPQclear, { res })
+
+	return status
 end function
