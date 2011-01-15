@@ -12,12 +12,12 @@ sequence data = {
 }
 
 edbi:set_driver_path("../drivers")
---edbi:db_handle dbh = edbi:open("sqlite3://example.db")
+edbi:db_handle dbh = edbi:open("sqlite3://example.db")
 --edbi:db_handle dbh = edbi:open("mysql://user:secret@localhost/test")
 --edbi:db_handle dbh = edbi:open("pgsql://user:secret@localhost/pgtest")
 
 edbi:execute("DROP TABLE people")
-edbi:execute("CREATE TABLE people (name VARCHAR(30), zip INTEGER, dob timestamp)")
+edbi:execute("CREATE TABLE people (name VARCHAR(30), zip INTEGER, dob DATETIME)")
 
 for i = 1 to length(data) do
     edbi:execute("INSERT INTO people VALUES (%s, %d, %D)", data[i])
