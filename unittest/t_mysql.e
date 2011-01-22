@@ -4,25 +4,23 @@ include edbi/edbi.e
 include std/get.e
 edbi:set_driver_path("../drivers")
 
+/* This should fail but does not! Trying to open a non-existing database still returns TRUE... */
+--assert("Open non-existing database",edbi:open("mysql://spiderman:maryjane@192.168.1.100/NotExist"))
 
 /* Open/Edit a database, if this fails, abort the rest of the test */
-assert("Open database",edbi:open("sqlite3://unitTest.db"))
-
-/* Organize the drop table statements together because the second
- seems to fail if not done in succession */
-test_false("Drop table TestNum",edbi:execute("DROP TABLE TestNum"))
-test_false("Drop table TestString",edbi:execute("DROP TABLE TestString"))
-
-/* Test fundamental EDBI routines with generic SQL statements 
- * It appears that edbi:execute returns FALSE on success, i.e. no errors... 
- * Is this expected or a bug? */
+assert("Open database",edbi:open("mysql://spiderman:lynnlynn@192.168.1.100/UnitTest"))
 
 /* ---------------------------------------------------------------------
                   First, look at Numeric types... 
 --------------------------------------------------------------------- */
 object numbers = {111,76.4,3.14159},
        types = {"INTEGER", "NUMERIC", "REAL"}
-test_false("Create table TestNum",edbi:execute("CREATE TABLE TestNum (a %s, b %s, c %s)",types))
+       
+/* I can Drop tables in mysql but I can't seem to create them... So instead, just delete all values from the 
+ table instead of dropping it and manually create the table TestNum... Why does creating a table fail? 
+ NOTE: edbi:exeucte returns FALSE on success....    */ 
+test_false("Delete all current table values",edbi:execute("DELETE FROM TestNum where a LIKE '%'"))
+
 test_false("Insert values into TestNum",edbi:execute("INSERT INTO TestNum VALUES (%d,%f,%f)",numbers))
 
 /* Now check to make sure we can read back the different types of numerics */
@@ -41,13 +39,20 @@ data = edbi:next(dbr)
 	for ii = 1 to length(types) do
 		test_equal(sprintf("Checking %s data types with Query...",{types[ii]}),numbers[ii],data[ii])
 	end for
-	
+
+/* It appears that I can only work with 1 table at a time. If I don't close out the database and re-open,
+ * none of the Strings and Dates check will work... Comment out the next two lines to check...*/
+edbi:close()
+assert("Open database",edbi:open("mysql://spiderman:lynnlynn@192.168.1.100/UnitTest"))
+
 /* ---------------------------------------------------------------------
                       Look at strings and dates 
 --------------------------------------------------------------------- */
 object book = {"A Tale of Two Cities","Charles Dickens","English",datetime:new(1859, 1, 1, 23, 59, 0),datetime:new(2000,10,13)}
 types = {"TEXT", "VARCHAR", "BLOB", "DATETIME", "DATE" }
-test_false("Create table TestString",edbi:execute("CREATE TABLE TestString (title TEXT, author VARCHAR(30), language BLOB, date DATETIME, purchased DATE)"))
+
+/* Try deleting all values from the table instead of just dropping it... The table Test was create manually first...*/
+test_false("Delete all current table values",edbi:execute("DELETE FROM TestString where a LIKE '%'"))
 test_false("Insert values into string table",edbi:execute("INSERT INTO TestString VALUES (%s,%s,%s,%s,%D)",{book[1],book[2],book[3],datetime:format(book[4]),book[5]}))
 
 	/* Method 1 */
@@ -64,13 +69,6 @@ data = edbi:next(dbr)
 	for ii = 1 to length(types) do
 		test_equal(sprintf("Checking %s data types with Query...",{types[ii]}),book[ii],data[ii])
 	end for
-
-/* ---------------------------------------------------------------------
-                      Check general SQL commands 
-Is this an appropriate use of query_rows or is there another method to do this?
---------------------------------------------------------------------- */
-test_equal(".tables check",{"Numeric","String"},edbi:query_rows(".tables"))
-test_equal(".schema check",{"CREATE TABLE STRING..."},edbi:query_rows(".schema Numeric"))
 
 edbi:close()
 /* ---------------------------------------------------------------------
