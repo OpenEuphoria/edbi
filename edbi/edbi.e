@@ -322,6 +322,8 @@ public function open(sequence connection, object routines = 0 )
     sequence dll_name1 = sprintf("%s/%s/edbi_%s.%s", { driver_path, driver, driver, SHARED_LIB_EXT })
     sequence dll_name2 = sprintf("%s/edbi_%s.%s", { driver_path, driver, SHARED_LIB_EXT })
     sequence dll_name3 = sprintf("edbi_%s.%s", { driver, SHARED_LIB_EXT })
+    sequence dll_name4 = sprintf("/usr/local/lib/edbi_%s.%s", { driver, SHARED_LIB_EXT } )
+    sequence dll_name5 = sprintf("/usr/lib/edbi_%s.%s", { driver, SHARED_LIB_EXT } )
     sequence m_seq = repeat(0, T_END)
 
     atom m_h = eumem:malloc()
@@ -329,7 +331,7 @@ public function open(sequence connection, object routines = 0 )
 	m_seq[T_DRIVER] = driver
     m_seq[T_CONNSTR] = conn_str
     if atom(routines) then
-        atom hDll = open_dll({ dll_name1, dll_name2, dll_name3 })
+        atom hDll = open_dll({ dll_name1, dll_name2, dll_name3, dll_name4, dll_name5 })
         if hDll = 0 then
             crash("Could not open driver as:\n  %s\n  %s\n  %s", { dll_name1, dll_name2, dll_name3 })
         end if

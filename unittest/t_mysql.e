@@ -4,6 +4,9 @@ include edbi/edbi.e
 include std/get.e
 edbi:set_driver_path("../drivers")
 
+constant USER="user"
+constant PASSWORD="secret"
+
 /* ---------------------------------------------------------------------
                           NOTES: 
   edbi:exeucte returns FALSE on success, which is how Mysql API works!   
@@ -13,7 +16,7 @@ edbi:set_driver_path("../drivers")
 --assert("Open non-existing database",edbi:open("mysql://spiderman:maryjane@192.168.1.100/NotExist"))
 
 /* Open/Edit a database, if this fails, abort the rest of the test */
-assert("Open database",edbi:open("mysql://spiderman@localhost/UnitTest"))
+assert("Open database",edbi:open( sprintf("mysql://%s:%s@localhost/UnitTest",{USER,PASSWORD})  ))
 
 /* ---------------------------------------------------------------------
                   First, look at Numeric types... 
@@ -48,11 +51,12 @@ data = edbi:next(dbr)
 /* It appears that I can only work with 1 table at a time. If I don't close out the database and re-open,
  * none of the Strings and Dates check will work... Comment out the next two lines to check...*/
 edbi:close()
-assert("Open database",edbi:open("mysql://spiderman@localhost/UnitTest"))
+assert("Open database",edbi:open( sprintf("mysql://%s:%s@localhost/UnitTest",{USER,PASSWORD})  ))
 
 /* ---------------------------------------------------------------------
                       Look at strings and dates 
 --------------------------------------------------------------------- */
+
 object book = {"A Tale of Two Cities","Charles Dickens","English",datetime:new(1859, 1, 1, 23, 59, 0),datetime:new(2000,10,13)}
 types = {"TEXT", "VARCHAR(30)", "BLOB", "DATETIME", "DATE" }
 test_false("Drop table TestString",edbi:execute("DROP TABLE TestString"))

@@ -5,6 +5,9 @@
 include std/datetime.e
 include edbi/edbi.e
 
+constant USER="jerome"
+constant PASSWORD="il.92423"
+
 sequence data = {
     { "Ronald Mc'Donald", 29382, datetime:subtract(datetime:new(), 32, YEARS) },
     { "Super Man", 55555, datetime:new(1944, 5, 18) },
@@ -12,9 +15,14 @@ sequence data = {
 }
 
 edbi:set_driver_path("../drivers")
-edbi:db_handle dbh = edbi:open("sqlite3://example.db")
---edbi:db_handle dbh = edbi:open("mysql://user:secret@localhost/test")
---edbi:db_handle dbh = edbi:open("pgsql://user:secret@localhost/pgtest")
+
+ifdef sqlite3 then
+	edbi:db_handle dbh = edbi:open("sqlite3://example.db")
+elsifdef pgsql then
+	edbi:db_handle dbh = edbi:open( sprintf("pgsql://%s:%s@localhost/pgtest",{USER,PASSWORD}) )
+elsedef
+	edbi:db_handle dbh = edbi:open( sprintf("mysql://%s:%s@localhost/UnitTest",{USER,PASSWORD}) )
+end ifdef
 
 edbi:execute("DROP TABLE people")
 edbi:execute("CREATE TABLE people (name VARCHAR(30), zip INTEGER, dob DATETIME)")

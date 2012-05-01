@@ -62,7 +62,9 @@ enum
 
 constant lib_mysql = open_dll({
     "/home/openeuph/euweb/libmysqlclient.so.15.0.0", -- stupid hack for openeuphoria.org
-    "libmysqlclient.so",
+    "libmysqlclient.so", 
+    "/usr/lib/libmysqlclient.so",
+    "/usr/local/lib/libmysqlclient.so",
     "libmysqlclient.dylib",
 	"libmysql.dll"
 })
@@ -185,12 +187,20 @@ function mysql_use_result(atom dbh)
 	return c_func(h_mysql_use_result, {dbh})
 end function
 
-function mysql_fetch_field_direct(atom dbr, integer idx)
-	atom p_f = c_func(h_mysql_fetch_field_direct, { dbr, idx })
-	sequence name = peek_string(peek4u(p_f))
-	integer typ = peek4u(p_f + 76)
-	return { name, typ }
-end function
+-- Matt's second update for 64 bit euphoria compatibility
+ifdef BITS32 then 
+	constant MYSQL_FIELD_type = 76 
+elsedef 
+	constant MYSQL_FIELD_type = 112 
+end ifdef 
+
+-- Matt's new mysql_fetch_field_direct 
+function mysql_fetch_field_direct(atom dbr, integer idx) 
+	atom p_f = c_func(h_mysql_fetch_field_direct, { dbr, idx }) 
+	sequence name = peek_string(peek_pointer(p_f)) 
+	integer typ = peek4u(p_f + MYSQL_FIELD_type) 
+	return { name, typ } 
+end function 
 
 public procedure edbi_closeq(atom dbr)
 	c_proc(h_mysql_free_result, {dbr})
@@ -204,26 +214,40 @@ function mysql_fetch_lengths(atom dbr)
 	return c_func(h_mysql_fetch_lengths, {dbr})
 end function
 
-public function edbi_next(atom dbr, atom row)
-	atom p_lengths, p_row = c_func(h_mysql_fetch_row, {dbr})
-	integer field_count
-	object data = {}, tmp
+-- Extra routine needed for Matt's update to edbi_next
+function peek_longu( object ptr ) 
+    ifdef LONG32 then 
+        return peek4u( ptr ) 
+    elsedef 
+        return peek8u( ptr ) 
+    end ifdef 
+end function 
 
-	row = row -- not used
-
-	if p_row = 0 then
-		return 0
-	end if
-
-	p_lengths = mysql_fetch_lengths(dbr)
-	field_count = mysql_num_fields(dbr)
-
-	for i = 0 to (field_count - 1) * 4 by 4 do
-		data &= {peek({peek4u(p_row + i), peek4u(p_lengths + i)})}
-	end for
-
-	return data
-end function
+-- Matt's update for edbi_next to work with both 32 and 64 bit euphoria 
+public function edbi_next(atom dbr, atom row) 
+	atom p_lengths, p_row = c_func(h_mysql_fetch_row, {dbr}) 
+	integer field_count 
+	object data = {}, tmp 
+ 
+	row = row -- not used 
+ 
+	if p_row = 0 then 
+		return 0 
+	end if 
+ 
+	p_lengths = mysql_fetch_lengths(dbr) 
+	field_count = mysql_num_fields(dbr) 
+ 
+        integer row_offset = 0 
+        integer len_offset = 0 
+	for i = 0 to (field_count - 1) * sizeof( C_POINTER ) by sizeof( C_POINTER ) do 
+		data &= {peek({peek_pointer(p_row + row_offset), peek_longu(p_lengths + len_offset)})} 
+                row_offset += sizeof( C_POINTER ) 
+                len_offset += sizeof( C_LONG ) 
+	end for 
+ 
+	return data 
+end function 
 
 public function edbi_execute(atom dbh, sequence sql)
 	atom p_sql = allocate_string(sql)

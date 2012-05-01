@@ -1,3 +1,4 @@
+EUDIR = /usr/share/euphoria64
 CC     = gcc
 CFLAGS = -DEFree=free -DEMalloc=malloc -DERealloc=realloc -fomit-frame-pointer -fPIC \
 	-w -fsigned-char -O3 -I$(EUDIR)/include -I.. -DESIMPLE_MALLOC
