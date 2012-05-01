@@ -5,8 +5,8 @@
 include std/datetime.e
 include edbi/edbi.e
 
-constant USER="jerome"
-constant PASSWORD="il.92423"
+constant USER="user"
+constant PASSWORD="secret"
 
 sequence data = {
     { "Ronald Mc'Donald", 29382, datetime:subtract(datetime:new(), 32, YEARS) },
